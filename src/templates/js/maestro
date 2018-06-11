@@ -1,0 +1,391 @@
+//variable para almacenar formulario en memoria
+var confirmationFormData = new FormData();
+//variable que almacena los datos enviados en JSON a la vista para editar
+var editData = {};
+//variable que almacena los datos enviados en JSON a la vista para editar
+var deleteData = {};
+//variable para manejar posibles errores que afecten a vista, false: no existe error / true: existe error.
+var call_status = {"error":false};
+//variable para controlar vista si existen errores de validación de campos (valida)
+var list_errors = {"error":false};
+// variable para manejar busquedas con timeout
+var timeoutID;
+//Variable para saber si se debe gatillar algún botón (Buscar o Paginador)para refrescar lsitasdo de elementos
+var refresh_status = {"active":false};
+
+
+$(document).ready(function(){
+
+    /**
+     * LLama a confirmación de crear <<MAESTRO_ES>>
+     */
+    $(document).on("click", "#<<MAESTRO_EN>>_create", function () {
+
+
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        App.startAnimation("saveBtn", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData($("#formCreate<<MAESTRO_EN>>")[0]);
+        dataIn.append("action_type", "create");
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call.success(function(){
+
+            btnE.html(btnHtml);
+            btnE.prop("disabled",0);
+            App.init();
+
+        });
+
+    });
+
+
+    /**
+     *  LLama a crear <<MAESTRO_ES>> (persistencia)
+     */
+    $(document).on('click', "#confirm_create_<<MAESTRO_EN>>", function () {
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        App.startAnimation("saveBtn", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData($("#formCreate<<MAESTRO_EN>>")[0]);
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+        call_status.error = false;
+
+        call.success(function(){
+
+            if(call_status.error === false) {
+
+                clean_form();
+                refresh_table();
+
+            }
+
+            swal.close();
+            call_status.error = false;
+            App.init();
+
+        });
+    });
+
+
+    /**
+     *      LLama a confirmación de eliminar <<MAESTRO_ES>>
+     */
+    $(document).on("click", ".delete-<<MAESTRO_EN>>", function () {
+
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        $(this).trigger("mouseleave"); // para quitar tooltip
+
+        App.startAnimation("saveBtnSmall", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData();
+        dataIn.append("action_type", "delete");
+        dataIn.append("<<MAESTRO_EN>>", $(this).data("id"));
+
+        deleteData.<<MAESTRO_EN>> = $(this).data("id");
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call.success(function(){
+
+            btnE.html(btnHtml);
+            btnE.prop("disabled",0);
+            App.init();
+
+        });
+
+    });
+
+
+    /**
+     *  LLama a eliminar <<MAESTRO_ES>> (persistencia)
+     */
+    $(document).on('click', "#confirm_delete_<<MAESTRO_EN>>", function () {
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        App.startAnimation("saveBtn", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData();
+        dataIn.append("<<MAESTRO_EN>>", deleteData.<<MAESTRO_EN>>);
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call_status.error = false;
+        refresh_status.active = false;
+
+        call.success(function(){
+
+            if(refresh_status.active === true || call_status.error === false) {
+                refresh_table();
+            }
+
+            swal.close();
+            call_status.error = false;
+            refresh_status.active = false;
+            App.init();
+
+            deleteData = {};
+
+        });
+    });
+
+
+
+    /**
+     *  Llama a confirmación de editar <<MAESTRO_ES>>
+     */
+    $(document).on('click', "#<<MAESTRO_EN>>_edit", function () {
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        App.startAnimation("saveBtn", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData();
+
+        var name = $("#<<MAESTRO_EN>>_name_main").val();
+        var <<MAESTRO_EN>> = $("#<<MAESTRO_EN>>_id").val();
+
+        dataIn.append("<<MAESTRO_EN>>",<<MAESTRO_EN>> );
+        dataIn.append("<<MAESTRO_EN>>_name_main",name );
+        dataIn.append("action_type", "update");
+
+        editData.<<MAESTRO_EN>> = <<MAESTRO_EN>>;
+        editData.name   = name;
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call.success(function(){
+            App.init();
+            btnE.html(btnHtml);
+            btnE.prop("disabled",0);
+        });
+    });
+
+
+    /**
+     *      PERSISTE EDICION
+     */
+    $(document).on("click", "#confirm_update_<<MAESTRO_EN>>", function () {
+
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        App.startAnimation("saveBtn", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData();
+
+        dataIn.append("<<MAESTRO_EN>>", editData.<<MAESTRO_EN>> );
+        dataIn.append("<<MAESTRO_EN>>_name_main", editData.name );
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call_status.error       = false;
+        refresh_status.active   = false;
+
+        call.success(function(){
+
+            if(call_status.error === false || refresh_status.active === true ) {
+
+                clean_form();
+                refresh_table();
+                stop_edition();
+
+            }
+
+            swal.close();
+            call_status.error       = false;
+            refresh_status.active   = false;
+            editData = {};
+            App.init();
+
+        });
+
+    });
+
+
+    /**
+     *      SOLO CARGA LOS DATOS !! Carga los datos de la <<MAESTRO_ES>> a editar dentro del formulario
+     */
+    $(document).on('click', '.edit-<<MAESTRO_EN>> ', function () {
+        var btnE = $(this);
+        var btnHtml = btnE.html();
+
+        //para quitar tooltip
+        btnE.trigger("mouseleave");
+
+        App.startAnimation("saveBtnSmall", btnE);
+
+        var action = $(this).data("url");
+        var dataIn = new FormData();
+
+        dataIn.append("<<MAESTRO_EN>>",$(this).data("id") );
+
+
+        var call = $.callAjax(dataIn, action, $(this));
+
+        call_status.error = false;
+        refresh_status.active = false;
+
+        //limpiamos formulario antes de editar
+        clean_form();
+
+        call.success(function(){
+
+            if(refresh_status.active === true) {
+                refresh_table();
+            }
+
+            // SI NO HAY NINGUN ERROR
+            if( call_status.error       === false &&
+                refresh_status.active   === false
+            ){
+
+                // LOGICA VISTA
+                start_edition();
+
+            }
+
+            call_status.error = false;
+            refresh_status.active = false;
+
+            App.init();
+            btnE.html(btnHtml);
+            btnE.prop("disabled",0);
+
+        });
+    });
+
+
+    /**
+     *      LIMPIA FORM, CAMBIA PESTAÑA. CANCELA LA EDICION
+     */
+    $(document).on("click", "#<<MAESTRO_EN>>_edit_cancel", function () {
+
+        stop_edition();
+
+    });
+
+
+
+    $(document).on("click", "#cancel_confirm_delete_<<MAESTRO_EN>>", function () {
+
+        deleteData = {};
+
+    });
+
+
+    /**
+     *      Refresca appinit al cambiar de pestaña hacia "consultar"
+     */
+    $(document).on('shown.bs.tab', "#search_tab_show", function () {
+
+        window.App.init();
+
+    });
+
+
+    $('#formCreateOrigin').on('keyup keypress', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+
+
+});
+
+
+
+
+/**
+ *  resetea el formulario de creacion
+ */
+function clean_form() {
+    $("#<<MAESTRO_EN>>_name_main").trigger("click");
+    $("#<<MAESTRO_EN>>_name_main").val("");
+    $("#<<MAESTRO_EN>>_id").val("");
+}
+
+
+/**
+ *  Actualiza tabla de consultar procedencias
+ */
+function refresh_table(){
+
+    var action = $("#<<MAESTRO_EN_PLURAL>>_table").data("url");
+    var dataIn = new FormData();
+
+    var call = $.callAjax(dataIn, action, $(this));
+
+    call.success(function(){
+
+        App.init();
+
+    });
+}
+
+
+/**
+ *      Cambia a pestaña edicion y cambia titulo
+ */
+function start_edition() {
+
+    var edition_tab = $("#create_tab_show");
+
+    edition_tab.html(' <i class="fa fa-edit"></i> Editando <<MAESTRO_ES>> ..');
+
+    $("#<<MAESTRO_EN>>_edit").removeClass("hidden");
+    $("#<<MAESTRO_EN>>_edit_cancel").removeClass("hidden");
+    $("#<<MAESTRO_EN>>_create").removeClass("hidden").addClass("hidden");
+
+
+    edition_tab.trigger("click");
+}
+
+
+/**
+ *      Cambia a pestaña consultar y cambia titulo
+ */
+function stop_edition() {
+
+    clean_form();
+
+    var edition_tab = $("#create_tab_show");
+    var search_tab = $("#search_tab_show");
+
+    edition_tab.html(' <i class="fa fa-plus"></i> Crear <<MAESTRO_ES>>');
+
+
+    $("#<<MAESTRO_EN>>_edit").removeClass("hidden").addClass("hidden");
+    $("#<<MAESTRO_EN>>_edit_cancel").removeClass("hidden").addClass("hidden");
+    $("#<<MAESTRO_EN>>_create").removeClass("hidden");
+
+
+    search_tab.trigger("click");
+}
+
+
+

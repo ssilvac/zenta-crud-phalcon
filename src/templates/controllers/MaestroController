@@ -1,0 +1,429 @@
+<?php
+namespace App\Controllers\<<CONTROLLER_MODULE>>;
+
+use App\Business\<<MAESTRO_CLASS_NAME>>BSN;
+/**
+ * Class <<MAESTRO_CLASS_NAME>>Controller
+ * @package App\Controllers\<<CONTROLLER_MODULE>>
+ */
+class <<MAESTRO_CLASS_NAME_UCFIRST>>Controller extends ControllerBase
+{
+    /**
+     * indexAction
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a Mantenedor de <<MAESTRO_ES_PLURAL>>
+     */
+    public function indexAction()
+    {
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $<<MAESTRO_EN_PLURAL>> = $bsn->getAllBy([]);
+
+        $this->assets->addJs('js/pages/<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>.js');
+        $this->view->setVar("menu","<<MAESTRO_EN_PLURAL>>");
+        $this->view->setVar("<<MAESTRO_EN_PLURAL>>",$<<MAESTRO_EN_PLURAL>>);
+        $this->view->pick('<<VIEWS_FOLDER>>index');
+    }
+
+
+    /**
+     * refreshAction
+     *
+     * Recarga tabla de <<MAESTRO_ES_PLURAL>> con ajax
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a listar <<MAESTRO_ES_PLURAL>> en mantenedor
+     */
+    public function refreshAction()
+    {
+        if ( ! $this->request->isAjax() ) {
+            $this->defaultRedirect();
+        }
+
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $<<MAESTRO_EN_PLURAL>> = $bsn->getAllBy([]);
+        $dataView["<<MAESTRO_EN_PLURAL>>"] = $<<MAESTRO_EN_PLURAL>>;
+        $view = $this->view->getPartial('<<VIEWS_FOLDER>>_table', $dataView);
+
+        $this->mifaces->newFaces();
+        $this->mifaces->addToRend('<<MAESTRO_EN_PLURAL>>_table', $view);
+        $this->mifaces->run();
+    }
+
+    /**
+     * confirmationAction
+     *
+     * Metodo para manejar las confirmaciones
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a confirmacion de acciones (crear/editar/eliminar)
+     */
+    public function confirmationAction()
+    {
+        #Validaciones previas que son para todos los controllers iguales
+        $this->beforeConfirmation();
+        $post = $this->request->getPost();
+
+        #Se define configuración del swal, posibles casos al apretar "Aceptar"
+        switch ( $post["action_type"] ) {
+            case "update":
+                $dataView = $this->confirmationUpdate($post);
+                break;
+
+            case "create":
+                $dataView = $this->confirmationCreate($post);
+                break;
+
+            case "delete":
+                $dataView = $this->confirmationDelete($post);
+                break;
+
+            default:
+                $this->mifaces->addToMsg("warning", "No se esperaba la operación seleccionada, favor refresque la página e intente nuevamente.", true);
+                exit;
+                break;
+        }
+
+        #Definimos parametros para swal
+        $dataView['element'] = "<<MAESTRO_ES>>";
+
+        # operacioens para renderizar modal de confirmación, para todos iguales.
+        $this->afterConfirmation($dataView);
+    }
+
+    /**
+     * confirmationCreate
+     *
+     * Metodo privado para crear modal de confirmacion al crear
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @param $post
+     * @return array
+     */
+    private function confirmationCreate($post)
+    {
+        $config = [];
+        $name = null;
+        $created_by = null;
+
+        $url_base = $this->config->get("application")["publicUrl"];
+
+        $action = "Crear <<SUBJECT>>";
+        $url = $url_base . "<<URL_BASE_CRUD>>create/";
+        $message_type = "add_multiple";
+
+        if(isset($post["<<MAESTRO_EN>>_name_main"]) && !empty($post["<<MAESTRO_EN>>_name_main"])) {
+            $name = trim(mb_strtoupper($post["<<MAESTRO_EN>>_name_main"]));
+        }
+
+        if(!empty($this->session->get('auth-identity')['nombre'])) {
+            $created_by = $this->session->get('auth-identity')['nombre'];
+        }
+
+        $item_details['items'][]    = ['index_col'=> 12, 'break_point'=> 0, 'name' => 'Nombre', 'data' => $name];
+        $item_details['items'][]    = ['index_col'=> 12, 'break_point'=> 0, 'name' => 'Creado por', 'data' => trim(mb_strtoupper($created_by))];
+
+        $config['action']         = $action;
+        $config['id']             = "confirm_create_<<MAESTRO_EN>>";
+        $config['url']            = $url;
+        $config['message_type']   = $message_type;
+        $config['data']           = $item_details;
+
+        return $config;
+    }
+
+    /**
+     * createAction
+     *
+     * Persistir <<MAESTRO_ES>> en db
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a crear nueva <<MAESTRO_ES>>
+     */
+    public function createAction()
+    {
+        if( ! $this->request->isAjax()) {
+            $this->defaultRedirect();
+        }
+
+        $this->mifaces->newFaces();
+        $post = $this->request->getPost();
+
+        $this->validaForm([
+            "<<MAESTRO_EN>>_name_main" => "required|string|min:1|max:150"
+        ]);
+
+        $param = [
+            "name"      => $post["<<MAESTRO_EN>>_name_main"],
+            "user_id"   => !empty($this->session->get('auth-identity')['id']) ? $this->session->get('auth-identity')['id'] : 1 , // medida de prevencion
+        ];
+
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $response = $bsn->create($param);
+
+        if( ! $response ) {
+
+            $this->errorGeneral( $bsn->error );
+        }
+
+        $this->mifaces->addToJsonView("call_status",["error"=>false]);
+        $this->mifaces->addToMsg("success","<<MAESTRO_ES>> cread<<SEX>> correctamente");
+        $this->mifaces->run();
+    }
+
+
+
+    /**
+     * confirmationDelete
+     *
+     * Metodo privado para crear modal de confirmacion al eliminar
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @param $post
+     * @return array
+     */
+    private function confirmationDelete($post)
+    {
+        $config = [];
+        $<<MAESTRO_EN>>_details = [];
+        $name = null;
+        $created_by = null;
+
+        $url_base = $this->config->get("application")["publicUrl"];
+
+        $action = "Eliminar <<SUBJECT>>";
+        $url = $url_base . "<<URL_BASE_CRUD>>delete/";
+        $message_type = "add_multiple";
+
+        if(isset($post["<<MAESTRO_EN>>"]) && !empty($post["<<MAESTRO_EN>>"]) && is_numeric($post["<<MAESTRO_EN>>"])) {
+
+            $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+            $item = $bsn->getFirstBy(["id"=>$post["<<MAESTRO_EN>>"]]);
+
+            if($item) {
+
+                $name = $item->name;
+                $created_by = $item->UserDetails->firstname. " " . $item->UserDetails->lastname . " " . $item->UserDetails->lastname_mother;
+                $created_by = mb_strtoupper($created_by);
+
+                $<<MAESTRO_EN>>_details['items'][]    = ['index_col'=> 12, 'break_point'=> 0, 'name' => 'Nombre', 'data' => $name];
+                $<<MAESTRO_EN>>_details['items'][]    = ['index_col'=> 12, 'break_point'=> 0, 'name' => 'Creado por', 'data' => $created_by];
+            }
+        }
+
+        $config['action']         = $action;
+        $config['id']             = "confirm_delete_<<MAESTRO_EN>>";
+        $config['id_cancel']      = "cancel_confirm_delete_<<MAESTRO_EN>>";
+        $config['url']            = $url;
+        $config['message_type']   = $message_type;
+        $config['data']           = $<<MAESTRO_EN>>_details;
+
+        return $config;
+    }
+
+    /**
+     * deleteAction
+     *
+     * Persiste Eliminación
+     *
+     * @author jasilva - Jorge Silva Aguilera - jorge.silva@zentagroup.com
+     * @title Acceso a Eliminar <<MAESTRO_ES_PLURAL>>
+     */
+    public function deleteAction()
+    {
+        if( ! $this->request->isAjax()) {
+            $this->defaultRedirect();
+        }
+
+        $this->mifaces->newFaces();
+        $post = $this->request->getPost();
+
+        if(empty($post["<<MAESTRO_EN>>"]) || !is_numeric($post["<<MAESTRO_EN>>"])) {
+
+            $this->mifaces->addToMsg("warning","No se encontró el elemento, refrezque la página e intente nuevamente.");
+            $this->mifaces->addToJsonView("call_status",["error"=>true]);
+            $this->mifaces->run();
+            return false;
+        }
+
+        $param = [
+            "id"      => $post["<<MAESTRO_EN>>"],
+        ];
+
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $response = $bsn->delete($param);
+
+        if( ! $response ) {
+
+            if( $bsn->error->word_code == 'NO_RECORDS_FOUND' ){
+
+                $this->mifaces->addToMsg($bsn->error->type_alert , $bsn->error->message." Se recargará la página." );
+                $this->mifaces->addToJsonView("refresh_status",["active"=>true]);
+                $this->mifaces->run();
+                return false;
+            }
+
+            $this->errorGeneral( $bsn->error );
+        }
+
+        $this->mifaces->addToJsonView("call_status",["error"=>false]);
+        $this->mifaces->addToMsg("success","<<MAESTRO_ES>> eliminada correctamente");
+        $this->mifaces->run();
+    }
+
+    /**
+     * confirmationUpdate
+     *
+     * Metodo privado para crear modal de confirmacion de edición
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title confirmationUpdate
+     * @param $post
+     */
+    private function confirmationUpdate($post)
+    {
+        $config = [];
+        $<<MAESTRO_EN>>_details = [];
+        $name = null;
+        $created_by = null;
+
+        $url_base = $this->config->get("application")["publicUrl"];
+
+        $action = "Editar <<SUBJECT>>";
+        $url = $url_base . "<<URL_BASE_CRUD>>update/";
+        $message_type = "update";
+
+        if(isset($post["<<MAESTRO_EN>>"]) && !empty($post["<<MAESTRO_EN>>"]) && is_numeric($post["<<MAESTRO_EN>>"])) {
+
+            $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+            $item = $bsn->getFirstBy(["id"=>$post["<<MAESTRO_EN>>"]]);
+
+            if($item) {
+
+                $<<MAESTRO_EN>>_details[] = [
+                    "key"   => "Nombre",
+                    "value_old" => $item->name,
+                    "value_new" => !empty($post["<<MAESTRO_EN>>_name_main"]) ? $post["<<MAESTRO_EN>>_name_main"] : ""
+                ];
+            }
+        }
+
+        $config['action']         = $action;
+        $config['id']             = "confirm_update_<<MAESTRO_EN>>";
+        $config['url']            = $url;
+        $config['message_type']   = $message_type;
+        $config['data']           = $<<MAESTRO_EN>>_details;
+
+        return $config;
+    }
+
+
+    /**
+     * loadupdateAction
+     *
+     * Carga la data en el formulario de edición con ajax
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a cargar datos para editar <<MAESTRO_ES>>
+     */
+    public function loadupdateAction()
+    {
+        if( ! $this->request->isAjax()) {
+            $this->defaultRedirect();
+        }
+
+        $this->mifaces->newFaces();
+        $post = $this->request->getPost();
+
+        if(empty($post["<<MAESTRO_EN>>"]) || !is_numeric($post["<<MAESTRO_EN>>"])) {
+
+            $this->mifaces->addToMsg("warning","No se encontró el elemento, refrezque la página e intente nuevamente.");
+            $this->mifaces->addToJsonView("call_status",["error"=>true]);
+            $this->mifaces->run();
+            return false;
+        }
+
+        $param = [
+            "id"      => $post["<<MAESTRO_EN>>"],
+        ];
+
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $response = $bsn->getFirstBy($param);
+
+        if( ! $response ) {
+
+            if( $bsn->error->word_code == 'NO_RECORDS_FOUND' ) {
+
+                $this->mifaces->addToMsg($bsn->error->type_alert , $bsn->error->message." Se recargará la página." );
+                $this->mifaces->addToJsonView("refresh_status",["active"=>true]);
+                $this->mifaces->run();
+                return false;
+            }
+
+            $this->errorGeneral( $bsn->error );
+        }
+
+        $this->mifaces->addToJsonView("call_status",["error"=>false]);
+        $this->mifaces->addToJsonView("refresh_status",["active"=>false]);
+
+        $form["<<MAESTRO_EN>>_name_main"]   = $response->name;
+        $form["<<MAESTRO_EN>>_id"]          = $response->id;
+
+        $this->mifaces->addToFormData($form);
+        $this->mifaces->run();
+    }
+
+
+    /**
+     * updateAction
+     *
+     * Persiste una edición
+     *
+     * @author <<DEVELOPER_AUTHOR>>
+     * @title Acceso a guardar la edicion
+     */
+    public function updateAction()
+    {
+        if( ! $this->request->isAjax()) {
+            $this->defaultRedirect();
+        }
+
+        $this->mifaces->newFaces();
+        $post = $this->request->getPost();
+
+        $this->validaForm([
+            "<<MAESTRO_EN>>_name_main" => "required|string|min:1|max:150"
+        ]);
+
+        if( empty($post["<<MAESTRO_EN>>"]) || !is_numeric($post["<<MAESTRO_EN>>"])) {
+            $this->mifaces->addToMsg("warning","Ocurrio un error, refresque la página e intente nuevamente");
+            $this->mifaces->addToJsonView("call_status",["error"=>true]);
+            $this->mifaces->run();
+            return false;
+        }
+
+        $param = [
+            "name"      => $post["<<MAESTRO_EN>>_name_main"],
+            "id"        => $post["<<MAESTRO_EN>>"],
+        ];
+
+        $bsn = new <<MAESTRO_CLASS_NAME>>BSN();
+        $response = $bsn->update($param);
+
+        if( ! $response ) {
+
+            if( $bsn->error->word_code == 'NO_RECORDS_FOUND' ){
+                $this->mifaces->addToMsg($bsn->error->type_alert , $bsn->error->message." Se recargará la página." );
+                $this->mifaces->addToJsonView("refresh_status",["active"=>true]);
+                $this->mifaces->run();
+                return false;
+            }
+
+            $this->errorGeneral( $bsn->error );
+        }
+
+        $this->mifaces->addToJsonView("call_status",["error"=>false]);
+        $this->mifaces->addToMsg("success","<<MAESTRO_ES>> actualizada correctamente");
+        $this->mifaces->run();
+    }
+}

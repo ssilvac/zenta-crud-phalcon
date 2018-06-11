@@ -1,0 +1,20 @@
+{
+  "<<SUBJECT>>": "la",
+  "<<PRONOUN>>": "una",
+  "<<SEX>>": "a",
+  "<<MAESTRO_CLASS_NAME>>": "CashBoxSections",
+  "<<MAESTRO_CLASS_NAME_LOWER>>": "cashboxsections",
+  "<<MAESTRO_CLASS_NAME_UCFIRST>>": "Cashboxsections",
+  "<<MAESTRO_ES>>": "Sección de caja",
+  "<<MAESTRO_ES_PLURAL>>": "Secciones de caja",
+  "<<MAESTRO_EN>>": "cashboxsection",
+  "<<MAESTRO_EN_PLURAL>>": "cashboxsections",
+  "<<DEVELOPER_AUTHOR>>": "Sebastián Silva sebastian.silva@zentagroup.com",
+  "<<MAESTRO_MODEL_NAME>>": "AdmCashBoxSections",
+  "<<CONTROLLER_MODULE>>": "Administration",
+  "<<CONTROLLER_MODULE_CAPSOFF>>": "administration",
+  "<<VIEWS_FOLDER>>": "controllers/administration/cashbox/cashboxsection/",
+  "<<URL_BASE_CRUD>>": "administration/cashboxsections/",
+  "<<SIDEBAR_FOLDER>>": "sidebar_administration/",
+  "<<MODULE_COLOR>>":"ocean"
+}

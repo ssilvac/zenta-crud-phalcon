@@ -1,0 +1,312 @@
+<?php
+namespace App\Business;
+
+use App\Models\<<MAESTRO_MODEL_NAME>>;
+use App\library\Errors\ErrorGenerator;
+
+class <<MAESTRO_CLASS_NAME>>BSN extends _CommonBSN
+{
+    /**
+     * @var array $error listado de errores
+     */
+    public $error;
+
+    /**
+     * getFirstBy
+     *
+     * Trae la primera <<MAESTRO_ES>> id o nombre, si no se envian
+     * parametros trae la primera <<MAESTRO_ES>> activa
+     *
+     * @param $param
+     * @return <<MAESTRO_CLASS_NAME>>|bool
+     * @author <<DEVELOPER_AUTHOR>>
+     */
+    public function getFirstBy($param)
+    {
+        $where = $this->getDataBind($param);
+
+        $result = <<MAESTRO_MODEL_NAME>>::findFirst($where);
+
+        if (!$result) {
+
+            $this->error    = ErrorGenerator::NoRecordsFound([
+                'message' => 'No se ha encontrado el ningún registro con los parámetros ingresados.'
+            ]);
+
+            return false;
+        }
+
+        return $result;
+    }
+
+    /**
+     * getAllBy
+     *
+     * Trae todas las <<MAESTRO_ES_PLURAL>> por id o nombre, si no se envian
+     * parametros trae todas las activas
+     *
+     * @param $param
+     * @return <<MAESTRO_CLASS_NAME>>|bool
+     * @author <<DEVELOPER_AUTHOR>>
+     */
+    public function getAllBy($param)
+    {
+        $where = $this->getDataBind($param);
+        $result = <<MAESTRO_MODEL_NAME>>::find($where);
+
+        if ($result->count() == 0) {
+
+           $this->error    = ErrorGenerator::NoRecordsFound([
+               'message' => 'No se han encontrado registros con los parámetros ingresados.'
+           ]);
+
+            return false;
+        }
+
+        return $result;
+    }
+
+    /**
+     * create
+     *
+     * Crea una nueva <<MAESTRO_ES>> de box
+     *
+     * @param $param
+     * @return <<MAESTRO_CLASS_NAME>>|bool
+     * @author <<DEVELOPER_AUTHOR>>
+     */
+    public function create($param)
+    {
+        if( !$this->valida($param, [
+            'user_id' => 'required|numeric',
+            'name' => 'required|string'
+        ], 'crear')) return false;
+
+        if ($this->getFirstBy($param)) {
+
+            $this->error = ErrorGenerator::DuplicateItem([
+                'message' => 'Oops! No se pudo crear <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.',
+                'trace_db' => '<<MAESTRO_MODEL_NAME>> con user_id ' . $param['user_id'] . ' y name ' . $param['name']
+            ]);
+
+            return false;
+        }
+
+        $item = new <<MAESTRO_MODEL_NAME>>();
+        $item->name = mb_strtoupper(trim($param['name']));
+        $item->created_at = date('Y-m-d H:i:s');
+        $item->created_by = $param['user_id'];
+        $item->softdelete = 0;
+
+        if (!$item->save()) {
+
+            $msg = "";
+
+            foreach ($item->getMessages() as $message) {
+                $msg .= $message->getMessage();
+            }
+
+            $this->error = ErrorGenerator::DatabaseCreateError([
+                "message"   => "Oops! No se pudo crear <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                'trace_db' => $msg
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * update
+     *
+     * Actualiza una <<MAESTRO_ES>> de box
+     *
+     * @param $param
+     * @return <<MAESTRO_CLASS_NAME>>|bool
+     * @author <<DEVELOPER_AUTHOR>>
+     */
+    public function update($param)
+    {
+        if( !$this->valida($param, [
+            'id' => 'required|numeric',
+            'name' => 'required|string'
+        ], 'editar')) return false;
+
+        $result = $this->getFirstBy(['id' => $param['id']]);
+
+        if (!$result) {
+
+            $this->error    = ErrorGenerator::NoRecordsFound([
+                "message"   => "Oops! No se pudo editar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                'trace_db' => '<<MAESTRO_MODEL_NAME>> con id ' . $param['id'] . ' y name ' . $param['name']
+            ]);
+
+            return false;
+        }
+
+        if ($this->getFirstBy([
+            'no_id' => $param['id'],
+            'name' => $param['name']
+        ])) {
+
+            $this->error = ErrorGenerator::DuplicateItem([
+                'message' => 'Oops! Ya existe <<SUBJECT>> <<MAESTRO_ES>> con los parametros indicados. Refresque y reintente.',
+                'trace_db' => '<<MAESTRO_MODEL_NAME>> con no_id ' . $param['id'] . ' y name ' . $param['name']
+            ]);
+            return false;
+        }
+
+        $result->name =  mb_strtoupper(trim($param['name']));
+
+        if (!$result->save()){
+
+            $msg = '';
+
+            foreach ($result->getMessages() as $message) {
+                $msg .= $message->getMessage();
+            }
+
+            $this->error = ErrorGenerator::DatabaseUpdateError([
+                'message' => 'Oops! No se pudo editar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.',
+                'trace_db' => $msg
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * delete
+     *
+     * elimina lógicamente una <<MAESTRO_ES>> de box
+     *
+     * @param $param
+     * @return <<MAESTRO_CLASS_NAME>>|bool
+     * @author <<DEVELOPER_AUTHOR>>
+     */
+    public function delete($param)
+    {
+        if( !$this->valida($param, [
+            'id' => 'required|numeric',
+        ], 'eliminar')) return false;
+
+        $item = $this->getFirstBy($param);
+
+        if (!$item) {
+            $this->error    = ErrorGenerator::NoRecordsFound([
+                "message"  => "Oops! No se pudo editar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                'trace_db' => '<<MAESTRO_MODEL_NAME>> con id ' . $param['id']
+            ]);
+            return false;
+        }
+
+        $item->softdelete = 1;
+
+        if (!$item->save()) {
+
+            $msg = '';
+
+            foreach ($item->getMessages() as $message) {
+                $msg .= $message->getMessage();
+            }
+
+            $this->error = ErrorGenerator::DatabaseDeleteError([
+                "message"   => "Oops! No se pudo eliminar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                'trace_db' => $msg
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * getDataBind
+     *
+     * Construye where para las queries comunes
+     *
+     * @param $param
+     * @return string $where
+     */
+    private function getDataBind($param) {
+
+        $conditions = [];
+        $bind = [];
+
+        $conditions[] = 'softdelete = :del:';
+        $bind['del'] = 0;
+
+        if (isset($param['id'])) {
+
+            $conditions[] = 'id = :id:';
+            $bind['id'] = $param['id'];
+
+        } elseif (isset($param['no_id'])) {
+
+            $conditions[] = 'id <> :id:';
+            $bind['id'] = $param['no_id'];
+        }
+
+        if (isset($param['name']) && !empty($param['name'])) {
+            $conditions[] = 'name = :name:';
+            $bind['name'] = mb_strtoupper(trim($param['name']));
+        }
+
+        $where = [
+            'conditions' => implode(' and ', $conditions),
+            'bind' => $bind
+        ];
+
+        return $where;
+
+    }
+
+    /**
+     * validaParams
+     *
+     * valida los parametros,
+     * y devuelve los errores según la librería Errors ( Errores maneoados por los business )
+     *
+     * @author ssilvac
+     * @param array $param
+     * @param array $rules
+     * @return boolean
+     */
+    public function valida($param, $rules = null, $action)
+    {
+        if( !is_null($param) && !is_array($param)) {
+
+            $this->error = ErrorGenerator::WrongParameters([
+                "message"   => "Oops! No se pudo ".$action." <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+            ]);
+
+            return false;
+        }
+
+        # si no vienen reglas retornamos true
+        if ( is_null($rules) ) return true;
+
+        #Validamos que vengan los parametros requeridos
+        $this->valida->validate($param, $rules);
+
+        if ( $this->valida->failed() ) {
+
+            $errors = $this->valida->getErrorBsn();
+
+            $this->error = ErrorGenerator::WrongParameters([
+                "message"   => "Oops! No se pudo ".$action." <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                "trace_db" => "Lista de errores: " . implode(', ', $errors)
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+}

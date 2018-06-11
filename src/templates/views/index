@@ -1,0 +1,40 @@
+{% extends "layouts/main_modules/<<CONTROLLER_MODULE_CAPSOFF>>.volt" %}
+
+{% block content %}
+
+    <div class="sidebar-left <<MODULE_COLOR>>">
+
+        {{ partial("controllers/<<CONTROLLER_MODULE_CAPSOFF>>/<<SIDEBAR_FOLDER>>sidebar_left") }}
+
+    </div>
+    <div class="sidebar-content-right-section">
+        <div class="padding-lg">
+            <div class="tab-content">
+                <div class="btn-tab-container <<MODULE_COLOR>>">
+                    <a  id="search_tab_show" href="#search_tab" data-toggle="tab" type="button" class="btn btn-tab-style <<MODULE_COLOR>> active">
+                        <i class="fa fa-search"></i> Consultar
+                    </a>
+                    <a  id="create_tab_show" href="#create_tab" data-toggle="tab" type="button" class="btn btn-tab-style <<MODULE_COLOR>>">
+                        <i class="fa fa-plus"></i> Crear <<MAESTRO_ES>>
+                    </a>
+                </div>
+                <div id="search_tab" class="tab-pane fade in active">
+
+                    {{ partial('<<VIEWS_FOLDER>>search') }}
+
+                </div>
+                <div id="create_tab" class="tab-pane fade">
+
+                    {{ partial('<<VIEWS_FOLDER>>main_form') }}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal">
+
+
+    </div>
+
+{% endblock %}

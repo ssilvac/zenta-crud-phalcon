@@ -1,0 +1,88 @@
+<label class="font-default"><i class="fa fa-list-ul"></i> <<MAESTRO_ES_PLURAL>> agregadas:</label>
+
+{% if <<MAESTRO_EN_PLURAL>> is not empty %}
+    {% set <<MAESTRO_EN_PLURAL>>_data = true %}
+{% endif %}
+
+<div class="datatable-<<MODULE_COLOR>>">
+<table class='table main-table <<MODULE_COLOR>> font-sm-default font-default table_pagination main-table' >
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Creado por</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody id="<<MAESTRO_EN_PLURAL>>_data_items_tbody" class="{{ <<MAESTRO_EN_PLURAL>>_data is not empty ? "" :"hidden" }}">
+
+
+    {% if <<MAESTRO_EN_PLURAL>>_data is not empty %}
+
+         {% if utility.tienepermiso('loadupdate', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') and  utility.tienepermiso('update', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+            {% set cando_edit = true %}
+         {% else %}
+            {% set cando_edit = false %}
+         {% endif %}
+
+        {% if utility.tienepermiso('delete', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+            {% set cando_delete = true %}
+        {% else %}
+            {% set cando_delete = false %}
+        {% endif %}
+
+
+        {% for <<MAESTRO_EN>> in <<MAESTRO_EN_PLURAL>> %}
+
+            {% set owner = <<MAESTRO_EN>>.UserDetails %}
+
+            <tr>
+                <td> {{ <<MAESTRO_EN>>.name|trim|upper }}</td>
+                <td> {{ (owner.firstname ~" "~ owner.lastname ~" "~ owner.lastname_mother)|trim|upper }}</td>
+                <td>
+
+                    {% if cando_edit %}
+
+                        <button type="button"
+                                class="edit-<<MAESTRO_EN>> btn btn-<<MODULE_COLOR>> btn-icon"
+                                data-toggle="tooltip"
+                                title="Editar"
+                                data-id="{{ <<MAESTRO_EN>>.id }}"
+                                data-url="{{ url("<<URL_BASE_CRUD>>loadupdate") }}">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+
+                    {% endif %}
+
+                    {% if cando_delete %}
+                        <button type="button"
+                                class="delete-<<MAESTRO_EN>> btn btn-barbie btn-icon"
+                                data-toggle="tooltip"
+                                title="Eliminar"
+                                data-id="{{ <<MAESTRO_EN>>.id }}"
+                                data-url="{{ url("<<URL_BASE_CRUD>>confirmation") }}">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+    {% endif %}
+
+    </tbody>
+    <tbody id="<<MAESTRO_EN_PLURAL>>_without_items" class="{{ <<MAESTRO_EN_PLURAL>>_data is not empty ? "hidden" :"" }}">
+        <tr>
+            <td colspan="2">
+                <div class="text-center">
+                    <div class="agenda-no-results"><span class="fa fa-info-circle"></span> No se han agregado <<MAESTRO_ES_PLURAL>>.</div>
+                    <hr class="hr-lighter bg-<<MODULE_COLOR>>">
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+
+
+

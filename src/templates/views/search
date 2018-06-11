@@ -1,0 +1,11 @@
+<form id='formSearch<<MAESTRO_EN>>'>
+    <div class="padding-lg">
+        <div class="row">
+            <div id="<<MAESTRO_EN_PLURAL>>_table" class="col-sm-12 datatable-<<MODULE_COLOR>>" data-url="{{ url('<<URL_BASE_CRUD>>refresh') }}">
+
+                {{ partial("<<VIEWS_FOLDER>>_table") }}
+
+            </div>
+        </div>
+    </div>
+</form>

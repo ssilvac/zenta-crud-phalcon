@@ -1,0 +1,32 @@
+<form id='formCreate<<MAESTRO_EN>>'>
+        <div class="padding-lg">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div class="form-group <<MODULE_COLOR>>">
+                        <label class="font-default">*Nombre:</label><br>
+                        <input  id="<<MAESTRO_EN>>_name_main" name="<<MAESTRO_EN>>_name_main" class="main-input <<MODULE_COLOR>> form-control validate" type="text">
+                    </div>
+                    <div class="box-error"><p id="<<MAESTRO_EN>>_name_main-error" class="error"></p></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="buttons text-right">
+
+                        {% if utility.tienepermiso('loadupdate', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') and  utility.tienepermiso('update', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+                            <button id="<<MAESTRO_EN>>_edit" type="button"  data-url="{{ url("<<URL_BASE_CRUD>>confirmation") }}" class="hidden btn btn-<<MODULE_COLOR>> width-150-px"><i class="fa fa-pencil"></i> Editar</button>
+                            <button id="<<MAESTRO_EN>>_edit_cancel" type="button" class="hidden btn btn-secondary-action width-150-px"><i class="fa fa-times"></i> Cancelar</button>
+                        {% endif %}
+
+                        {% if utility.tienepermiso('create', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+                            <button id="<<MAESTRO_EN>>_create" type="button"  data-url="{{ url("<<URL_BASE_CRUD>>confirmation") }}" class="btn btn-<<MODULE_COLOR>> width-150-px"><i class="fa fa-save"></i> Guardar </button>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <input type="hidden" id="<<MAESTRO_EN>>_id" name="<<MAESTRO_EN>>_id" value="">
+    
+    </form>
