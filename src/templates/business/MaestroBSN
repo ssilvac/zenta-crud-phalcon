@@ -270,14 +270,15 @@ class <<MAESTRO_CLASS_NAME>>BSN extends _CommonBSN
      * validaParams
      *
      * valida los parametros,
-     * y devuelve los errores según la librería Errors ( Errores maneoados por los business )
+     * y devuelve los errores según la librería Errors ( Errores manejados por los business )
      *
      * @author ssilvac
      * @param array $param
      * @param array $rules
+     * @param null $action
      * @return boolean
      */
-    public function valida($param, $rules = null, $action)
+    public function valida($param, $rules = null, $action = null)
     {
         if( !is_null($param) && !is_array($param)) {
 
