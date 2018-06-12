@@ -133,7 +133,12 @@ class <<MAESTRO_CLASS_NAME>>BSN extends _CommonBSN
             'name' => 'required|string'
         ], 'editar')) return false;
 
-        $result = $this->getFirstBy(['id' => $param['id']]);
+        $result = <<MAESTRO_MODEL_NAME>>::findFirst([
+            "id = :id:",
+            "bind"=> [
+                'id' => $param['id']
+            ]
+        ]);
 
         if (!$result) {
 
@@ -193,11 +198,16 @@ class <<MAESTRO_CLASS_NAME>>BSN extends _CommonBSN
             'id' => 'required|numeric',
         ], 'eliminar')) return false;
 
-        $item = $this->getFirstBy($param);
+        $item = <<MAESTRO_MODEL_NAME>>::findFirst([
+            "id = :id:",
+            "bind"=> [
+                'id' => $param['id']
+            ]
+        ]);
 
         if (!$item) {
             $this->error    = ErrorGenerator::NoRecordsFound([
-                "message"  => "Oops! No se pudo editar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
+                "message"  => "Oops! No se pudo eliminar <<SUBJECT>> <<MAESTRO_ES>>. Refresque y reintente.",
                 'trace_db' => '<<MAESTRO_MODEL_NAME>> con id ' . $param['id']
             ]);
             return false;
