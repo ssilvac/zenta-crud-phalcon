@@ -16,6 +16,13 @@ $VIEWS = [
 
 echo "> STARTING CRUD GENERATION.".PHP_EOL;
 
+
+if(!is_dir($OUTPUT)){
+
+    mkdir($OUTPUT);
+
+}
+
 clearDir($OUTPUT);
 echo "Cleaning Directory !" .PHP_EOL;
 
