@@ -240,7 +240,7 @@ class <<MAESTRO_CLASS_NAME_UCFIRST>>Controller extends ControllerBase
 
         if(empty($post["<<MAESTRO_EN>>"]) || !is_numeric($post["<<MAESTRO_EN>>"])) {
 
-            $this->mifaces->addToMsg("warning","No se encontró el elemento, refrezque la página e intente nuevamente.");
+            $this->mifaces->addToMsg("warning","No se encontró el elemento, refresque la página e intente nuevamente.");
             $this->mifaces->addToJsonView("call_status",["error"=>true]);
             $this->mifaces->run();
             return false;
@@ -267,7 +267,7 @@ class <<MAESTRO_CLASS_NAME_UCFIRST>>Controller extends ControllerBase
         }
 
         $this->mifaces->addToJsonView("call_status",["error"=>false]);
-        $this->mifaces->addToMsg("success","<<MAESTRO_ES>> eliminada correctamente");
+        $this->mifaces->addToMsg("success","<<MAESTRO_ES>> eliminad<<SEX>> correctamente");
         $this->mifaces->run();
     }
 
@@ -337,7 +337,7 @@ class <<MAESTRO_CLASS_NAME_UCFIRST>>Controller extends ControllerBase
 
         if(empty($post["<<MAESTRO_EN>>"]) || !is_numeric($post["<<MAESTRO_EN>>"])) {
 
-            $this->mifaces->addToMsg("warning","No se encontró el elemento, refrezque la página e intente nuevamente.");
+            $this->mifaces->addToMsg("warning","No se encontró el elemento, refresque la página e intente nuevamente.");
             $this->mifaces->addToJsonView("call_status",["error"=>true]);
             $this->mifaces->run();
             return false;
