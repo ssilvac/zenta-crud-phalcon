@@ -18,13 +18,13 @@
 
     {% if <<MAESTRO_EN_PLURAL>>_data is not empty %}
 
-         {% if utility.tienepermiso('loadupdate', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') and  utility.tienepermiso('update', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+         {% if utility.tienepermiso('loadupdate', '<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>') and  utility.tienepermiso('update', '<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>') %}
             {% set cando_edit = true %}
          {% else %}
             {% set cando_edit = false %}
          {% endif %}
 
-        {% if utility.tienepermiso('delete', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+        {% if utility.tienepermiso('delete', '<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>') %}
             {% set cando_delete = true %}
         {% else %}
             {% set cando_delete = false %}

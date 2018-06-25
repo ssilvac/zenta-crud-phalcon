@@ -13,12 +13,12 @@
                 <div class="col-sm-12">
                     <div class="buttons text-right">
 
-                        {% if utility.tienepermiso('loadupdate', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') and  utility.tienepermiso('update', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+                        {% if utility.tienepermiso('loadupdate', '<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>') and  utility.tienepermiso('update', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
                             <button id="<<MAESTRO_EN>>_edit" type="button"  data-url="{{ url("<<URL_BASE_CRUD>>confirmation") }}" class="hidden btn btn-<<MODULE_COLOR>> width-150-px"><i class="fa fa-pencil"></i> Editar</button>
                             <button id="<<MAESTRO_EN>>_edit_cancel" type="button" class="hidden btn btn-secondary-action width-150-px"><i class="fa fa-times"></i> Cancelar</button>
                         {% endif %}
 
-                        {% if utility.tienepermiso('create', '<<MAESTRO_CLASS_NAME_LOWER>>/<<CONTROLLER_MODULE_CAPSOFF>>') %}
+                        {% if utility.tienepermiso('create', '<<CONTROLLER_MODULE_CAPSOFF>>/<<MAESTRO_CLASS_NAME_LOWER>>') %}
                             <button id="<<MAESTRO_EN>>_create" type="button"  data-url="{{ url("<<URL_BASE_CRUD>>confirmation") }}" class="btn btn-<<MODULE_COLOR>> width-150-px"><i class="fa fa-save"></i> Guardar </button>
                         {% endif %}
 
